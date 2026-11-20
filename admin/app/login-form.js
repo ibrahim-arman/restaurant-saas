@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { API, api, assetUrl } from '../lib/api';
+import { brandTokens } from '../lib/theme';
 
 export default function LoginForm({ storeSlug = '' }) {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -35,7 +36,7 @@ export default function LoginForm({ storeSlug = '' }) {
   };
 
   const brandColor = /^#[0-9a-f]{6}$/i.test(store?.brandColor || '') ? store.brandColor : '#315a40';
-  const style = storeSlug ? { '--store-brand': brandColor } : undefined;
+  const style = storeSlug ? brandTokens(brandColor) : undefined;
 
   return <main className={`login-page ${storeSlug ? 'store-login-page' : ''}`} style={style}>
     <section className="login-card">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { api, assetUrl } from '../lib/api';
+import { brandTokens } from '../lib/theme';
 import FulfillmentSettings from './fulfillment';
 
 const ORDER_STATUSES = ['new', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'];
@@ -578,7 +579,7 @@ export default function Home({ storeSlug = '' }) {
   const meta = VIEW_META[activeView];
   const signOut = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); location.href = storeSlug ? `/${storeSlug}/login` : '/login'; };
   const brandColor = /^#[0-9a-f]{6}$/i.test(tenant?.brandColor || '') ? tenant.brandColor : '#315a40';
-  const appStyle = storeSlug ? { '--store-brand': brandColor } : undefined;
+  const appStyle = storeSlug ? brandTokens(brandColor) : undefined;
 
   return <div className={`admin-app ${storeSlug ? 'branded-portal' : ''}`} style={appStyle}>
     <aside className="sidebar">
@@ -592,7 +593,7 @@ export default function Home({ storeSlug = '' }) {
       <div className="sidebar-bottom"><div className="profile-chip"><div className="avatar">{user.name?.slice(0, 1)?.toUpperCase() || 'U'}</div><div className="profile-copy"><b>{user.name || 'Account'}</b><span>{user.role?.replace('_', ' ')}</span></div></div><button className="signout" onClick={signOut}>Sign out</button></div>
     </aside>
     <main className="admin-main">
-      <header className="topbar"><div><h1 className="topbar-title">{meta.title}</h1><div className="topbar-caption">{meta.caption}</div></div><div className="topbar-right"><span className="live-dot" />{storeSlug ? tenant?.name : 'Account active'}</div></header>
+      <header className="topbar"><div><h1 className="topbar-title">{meta.title}</h1><div className="topbar-caption">{meta.caption}</div></div><div className="topbar-right"><span className="live-dot" />{storeSlug && <span className="topbar-store-mark">{tenant?.logoUrl ? <img src={assetUrl(tenant.logoUrl)} alt="" width="28" height="28" /> : tenant?.name?.slice(0, 1)?.toUpperCase() || 'S'}</span>}{storeSlug ? tenant?.name : 'Account active'}</div></header>
       <div className="content">{activeView === 'stores' ? <SuperAdmin initialInquiry={selectedInquiry} onInquiryCreated={() => setSelectedInquiry(null)} /> : activeView === 'inquiries' ? <InquiryInbox onUseInquiry={inquiry => { setSelectedInquiry(inquiry); setView('stores'); }} /> : activeView === 'branding' ? <BrandingEditor isSuper={platformSuper} /> : activeView === 'products' ? <ProductManager /> : activeView === 'staff' ? <StaffManagement /> : activeView === 'fulfillment' ? <FulfillmentSettings canToggleFeatures={user.role === 'owner' || portalSuper} /> : <OrderBoard user={user} />}</div>
     </main>
   </div>;
