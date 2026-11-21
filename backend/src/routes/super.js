@@ -2,6 +2,7 @@
 const r = require('express').Router(), bcrypt = require('bcryptjs');
 const { auth, can } = require('../middleware/auth');
 const { Tenant, User, Inquiry, DEFAULT_FEATURES } = require('../models');
+const { defaultDeliveryAreas } = require('../karachiAreas');
 r.use(auth, can('*'));
 r.get('/tenants', async (q, s) => {
   const tenants = await Tenant.find().sort('-createdAt');
@@ -38,7 +39,7 @@ r.patch('/tenants/:id/branding', async (req, res) => {
 r.post('/tenants', async (req, res) => {
   const { name, slug, ownerEmail, ownerPassword } = req.body;
   try {
-    const t = await Tenant.create({ name, slug });
+    const t = await Tenant.create({ name, slug, deliveryAreas: defaultDeliveryAreas() });
     await User.create({ tenantId: t._id, name: name + ' Owner', email: ownerEmail, role: 'owner', password: await bcrypt.hash(ownerPassword, 10) });
     res.json(t);
   } catch (e) { res.status(400).json({ error: 'Slug or email already used' }); } });
