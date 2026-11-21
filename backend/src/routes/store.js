@@ -2,6 +2,7 @@
 const r = require('express').Router({ mergeParams: true });
 const { feature } = require('../middleware/auth');
 const { MenuItem, Order } = require('../models');
+const { storeStatus } = require('../hours');
 r.get('/', (req, res) => res.json({
   name: req.tenant.name,
   features: req.tenant.features,
@@ -10,6 +11,7 @@ r.get('/', (req, res) => res.json({
   brandColor: req.tenant.brandColor || '',
   tagline: req.tenant.tagline || '',
   city: req.tenant.city || '',
+  hours: storeStatus(req.tenant),
   deliveryAreas: (req.tenant.deliveryAreas || []).filter(area => area.enabled).map(area => ({ id: area._id, name: area.name, deliveryFee: area.deliveryFee, minimumOrder: area.minimumOrder })),
   pickupBranches: (req.tenant.pickupBranches || []).filter(branch => branch.enabled).map(branch => ({ id: branch._id, name: branch.name, address: branch.address, phone: branch.phone, openingHours: branch.openingHours })),
 }));
@@ -18,6 +20,9 @@ r.post('/orders', feature('onlineOrdering'), async (req, res) => {
   const { items = [], customer, paymentMethod, fulfillmentType = 'delivery', deliveryAreaId, pickupBranchId } = req.body;
   const pm = { cod: 'cod', card: 'cardPayments' }[paymentMethod];
   if (!pm || !req.tenant.features[pm]) return res.status(400).json({ error: 'Payment method not available' });
+  // Closed stores cannot take orders. The server checks this even if the page is out of date.
+  const status = storeStatus(req.tenant);
+  if (!status.open) return res.status(400).json({ error: status.tempClosed ? status.message : `This store is closed right now. ${status.nextOpen}`.trim() });
   const customerName = typeof customer?.name === 'string' ? customer.name.trim() : '';
   const customerPhone = typeof customer?.phone === 'string' ? customer.phone.trim() : '';
   const customerAddress = typeof customer?.address === 'string' ? customer.address.trim() : '';

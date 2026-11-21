@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api, assetUrl } from '../lib/api';
 import { brandTokens } from '../lib/theme';
 import FulfillmentSettings from './fulfillment';
+import HoursSettings from './hours';
 
 const ORDER_STATUSES = ['new', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'];
 const STATUS_LABELS = { new: 'New', preparing: 'Preparing', ready: 'Ready', out_for_delivery: 'Out for delivery', delivered: 'Delivered', cancelled: 'Cancelled' };
@@ -518,6 +519,7 @@ const VIEW_META = {
   products: { title: 'Product manager', caption: 'Manage your catalog' },
   staff: { title: 'Staff', caption: 'Manage people who help run your store' },
   fulfillment: { title: 'Delivery & pickup', caption: 'Manage service areas and pickup branches' },
+  hours: { title: 'Opening hours', caption: 'Set when customers can place orders' },
 };
 
 export default function Home({ storeSlug = '' }) {
@@ -572,7 +574,7 @@ export default function Home({ storeSlug = '' }) {
   const nav = platformSuper ? [{ id: 'stores', label: 'Stores', icon: 'S' }, { id: 'inquiries', label: 'Inquiries', icon: 'I' }, { id: 'branding', label: 'Branding', icon: 'B' }] : [
     { id: 'orders', label: 'Orders', icon: 'O' },
     ...(canManageProducts ? [{ id: 'products', label: 'Products', icon: 'P' }] : []),
-    ...(canManageFulfillment ? [{ id: 'fulfillment', label: 'Delivery & pickup', icon: 'D' }] : []),
+    ...(canManageFulfillment ? [{ id: 'fulfillment', label: 'Delivery & pickup', icon: 'D' }, { id: 'hours', label: 'Opening hours', icon: 'H' }] : []),
     ...(canManageStaff ? [{ id: 'staff', label: 'Staff', icon: 'T' }, { id: 'branding', label: 'Branding', icon: 'B' }] : []),
   ];
   const activeView = nav.some(item => item.id === view) ? view : nav[0].id;
@@ -594,7 +596,7 @@ export default function Home({ storeSlug = '' }) {
     </aside>
     <main className="admin-main">
       <header className="topbar"><div><h1 className="topbar-title">{meta.title}</h1><div className="topbar-caption">{meta.caption}</div></div><div className="topbar-right"><span className="live-dot" />{storeSlug && <span className="topbar-store-mark">{tenant?.logoUrl ? <img src={assetUrl(tenant.logoUrl)} alt="" width="28" height="28" /> : tenant?.name?.slice(0, 1)?.toUpperCase() || 'S'}</span>}{storeSlug ? tenant?.name : 'Account active'}</div></header>
-      <div className="content">{activeView === 'stores' ? <SuperAdmin initialInquiry={selectedInquiry} onInquiryCreated={() => setSelectedInquiry(null)} /> : activeView === 'inquiries' ? <InquiryInbox onUseInquiry={inquiry => { setSelectedInquiry(inquiry); setView('stores'); }} /> : activeView === 'branding' ? <BrandingEditor isSuper={platformSuper} /> : activeView === 'products' ? <ProductManager /> : activeView === 'staff' ? <StaffManagement /> : activeView === 'fulfillment' ? <FulfillmentSettings canToggleFeatures={user.role === 'owner' || portalSuper} /> : <OrderBoard user={user} />}</div>
+      <div className="content">{activeView === 'stores' ? <SuperAdmin initialInquiry={selectedInquiry} onInquiryCreated={() => setSelectedInquiry(null)} /> : activeView === 'inquiries' ? <InquiryInbox onUseInquiry={inquiry => { setSelectedInquiry(inquiry); setView('stores'); }} /> : activeView === 'branding' ? <BrandingEditor isSuper={platformSuper} /> : activeView === 'products' ? <ProductManager /> : activeView === 'staff' ? <StaffManagement /> : activeView === 'hours' ? <HoursSettings /> : activeView === 'fulfillment' ? <FulfillmentSettings canToggleFeatures={user.role === 'owner' || portalSuper} /> : <OrderBoard user={user} />}</div>
     </main>
   </div>;
 }

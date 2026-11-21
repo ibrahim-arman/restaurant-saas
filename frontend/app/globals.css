@@ -179,3 +179,6 @@ input, textarea, select { min-width: 0; }
   .store-topline { font-size: 10px; }.store-title h1 { font-size: 24px; }.product-card { align-items: flex-start; }.product-actions { align-self: center; }.contact-form-grid { grid-template-columns: 1fr; }.contact-field-full { grid-column: auto; }.platform-hero-art { min-height: 365px; transform: scale(.79); margin: -10px -42px; }.floating-card-top { right: -12px; }.floating-card-bottom { left: -15px; }.hero-bottom-note span:last-child { max-width: 58%; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+
+.badge-closed { color: #9b2c2c; background: #fbeaea; border-color: #f0c9c9; }
+.closed-banner { display: flex; flex-direction: column; gap: 2px; margin: 14px 0; padding: 12px 14px; border: 1px solid #f0c9c9; background: #fbeaea; color: #7a2323; border-radius: 12px; font-size: 14px; }

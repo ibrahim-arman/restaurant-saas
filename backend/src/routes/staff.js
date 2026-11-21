@@ -2,6 +2,7 @@
 const r = require('express').Router(), bcrypt = require('bcryptjs');
 const { auth, can, staffTenant } = require('../middleware/auth');
 const { Tenant, User, MenuItem, Order } = require('../models');
+const { defaultHours, cleanHours } = require('../hours');
 r.use(auth, staffTenant);
 r.get('/me', async (req, res) => res.json({ user: req.user, tenant: req.staffTenantId ? await Tenant.findById(req.staffTenantId) : null }));
 r.get('/menu', can('menu.view'), async (req, res) => res.json(await MenuItem.find({ tenantId: req.staffTenantId })));
@@ -105,5 +106,22 @@ r.delete('/pickup-branches/:id', can('fulfillment.delete'), async (req, res) => 
   const branch = tenant?.pickupBranches.id(req.params.id);
   if (!branch) return res.status(404).json({ error: 'Pickup branch not found.' });
   branch.deleteOne(); await tenant.save(); res.json({ ok: true });
+});
+r.get('/hours', can('hours.view'), async (req, res) => {
+  const tenant = req.staffTenantId && await Tenant.findById(req.staffTenantId).select('storeHours');
+  if (!tenant) return res.status(404).json({ error: 'Open a store portal to manage its hours.' });
+  res.json({ configured: !!tenant.storeHours, hours: tenant.storeHours || defaultHours() });
+});
+r.patch('/hours', can('hours.update'), async (req, res) => {
+  const { hours, error } = cleanHours(req.body);
+  if (error) return res.status(400).json({ error });
+  const tenant = await Tenant.findByIdAndUpdate(req.staffTenantId, { storeHours: hours }, { new: true });
+  if (!tenant) return res.status(404).json({ error: 'Store not found.' });
+  res.json({ hours });
+});
+// Removing the hours makes the store always open again.
+r.delete('/hours', can('hours.update'), async (req, res) => {
+  await Tenant.findByIdAndUpdate(req.staffTenantId, { $unset: { storeHours: 1 } });
+  res.json({ ok: true });
 });
 module.exports = r;

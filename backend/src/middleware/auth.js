@@ -3,8 +3,8 @@ const { Tenant, DEFAULT_FEATURES } = require('../models');
 // Role -> permissions. 'x.*' means everything under x. Edit here to customise roles.
 const ROLES = {
   super_admin: ['*'],
-  owner: ['menu.*', 'orders.*', 'staff.*', 'store.branding.update', 'store.fulfillment.update', 'fulfillment.*'],
-  manager: ['menu.*', 'orders.*', 'fulfillment.*'],
+  owner: ['menu.*', 'orders.*', 'staff.*', 'store.branding.update', 'store.fulfillment.update', 'fulfillment.*', 'hours.*'],
+  manager: ['menu.*', 'orders.*', 'fulfillment.*', 'hours.*'],
   cashier: ['orders.view', 'orders.update'],
   kitchen: ['orders.view', 'orders.update'],
   rider: ['orders.view', 'orders.update'] };

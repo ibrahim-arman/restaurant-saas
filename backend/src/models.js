@@ -27,6 +27,7 @@ const Tenant = m.model('Tenant', new S({
   features: { type: Object, default: () => ({ ...DEFAULT_FEATURES }) },
   deliveryAreas: { type: [DeliveryArea], default: () => [] },
   pickupBranches: { type: [PickupBranch], default: () => [] },
+  storeHours: { type: Object }, // weekly opening hours; empty means always open
 }, { timestamps: true }));
 const User = m.model('User', new S({
   tenantId: id, name: String, email: { type: String, unique: true, lowercase: true }, password: String,

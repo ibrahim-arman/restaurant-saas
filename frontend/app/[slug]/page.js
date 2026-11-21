@@ -86,6 +86,7 @@ export default function StorePage({ params }) {
   const cartItemCount = cartLines.reduce((sum, p) => sum + cart[p._id], 0);
   const cartSubtotal = cartLines.reduce((sum, p) => sum + p.price * cart[p._id], 0);
   
+  const hours = store?.hours || { open: true };
   const selectedArea = store?.deliveryAreas?.find(a => a.id === deliveryAreaId);
   const selectedBranch = store?.pickupBranches?.find(b => b.id === pickupBranchId);
   const deliveryFee = fulfillmentType === 'delivery' ? Number(selectedArea?.deliveryFee || 0) : 0;
@@ -99,7 +100,7 @@ export default function StorePage({ params }) {
 
   const submitOrder = async e => {
     e.preventDefault();
-    if (!cartLines.length || submitting) return;
+    if (!cartLines.length || submitting || !hours.open) return;
     setSubmitting(true);
     setOrderError('');
     try {
@@ -158,7 +159,7 @@ export default function StorePage({ params }) {
   const brandStyle = themeStyle(store);
 
   return <main className="store-shell" style={brandStyle}>
-    <div className="store-topline"><b>{store.city || 'Karachi'}</b><span>Open for orders</span></div>
+    <div className="store-topline"><b>{store.city || 'Karachi'}</b><span>{hours.open ? 'Open for orders' : 'Closed right now'}</span></div>
     
     <header className="store-header">
       <div className="brand-mark">
@@ -168,11 +169,13 @@ export default function StorePage({ params }) {
         <h1>{store.name}</h1>
         <p>{store.tagline}</p>
         <div className="store-meta">
-          <span className="meta-chip badge-open">OPEN</span>
-          <span className="meta-chip">11:00 AM — 11:00 PM</span>
+          <span className={`meta-chip ${hours.open ? 'badge-open' : 'badge-closed'}`}>{hours.open ? 'OPEN' : 'CLOSED'}</span>
+          {hours.todayHours && <span className="meta-chip">{hours.todayHours}</span>}
         </div>
       </div>
     </header>
+
+    {!hours.open && <div className="closed-banner" role="status"><b>{hours.tempClosed ? 'Temporarily closed' : 'Closed right now'}</b><span>{(hours.tempClosed ? hours.message : hours.nextOpen) || 'Please check back later.'} You can browse the menu, but ordering is paused.</span></div>}
 
     {store.heroImageUrl && <div className="store-hero"><img src={store.heroImageUrl} alt="" /><span>{store.name}</span></div>}
 
@@ -282,7 +285,7 @@ export default function StorePage({ params }) {
 
                 {orderError && <div className="error-message">{orderError}</div>}
                 
-                <button className="primary-button" type="submit" disabled={submitting || !minimumOrderMet}>
+                <button className="primary-button" type="submit" disabled={!hours.open || submitting || !minimumOrderMet}>
                   {submitting ? 'Placing order...' : `Place Order · ${money(orderTotal)}`}
                 </button>
                 {!minimumOrderMet && <p className="error-message">Minimum order for this area is {money(selectedArea.minimumOrder)}</p>}
